@@ -4,60 +4,77 @@ import java.util.Comparator;
 import java.util.Stack;
 
 class Dijkstra {
-  public void calculateShortestPath(Graph graph, Node startNode, Node targetNode) {
-    startNode.setDistance(0);
-    ArrayList<Node> visited = new ArrayList<Node>();
 
-    Comparator<PathInfo> costComparator = new Comparator<PathInfo>() {
-        public int compare(PathInfo a, PathInfo b) {
-          return Integer.compare(a.cost, b.cost);
+  /**
+   * Calculate the shortest path from the starting node to the selected targetNode on a given graph
+   * @param graph: The graph containing the nodes and paths between those nodes
+   * @param startNode: The starting node from which the algorithm will branch out from
+   * @param targetNode: The node that is being searched for in the graph
+   * @return The graph with the updated data from the dijkstra algorithm
+   */
+  public Graph calculateShortestPath(Graph graph, Node startNode, Node targetNode) {
+    startNode.setDistance(0);
+
+    Comparator<Node> distanceComparator = new Comparator<Node>() {
+        public int compare(Node a, Node b) {
+          return Integer.compare(a.distance, b.distance);
         }
       };
+    PriorityQueue<Node> queue = new PriorityQueue<>(distanceComparator);
+    queue.add(startNode);
 
-    PriorityQueue<PathInfo> queue = new PriorityQueue<>(costComparator);
-    System.out.println("Dijkstra class");
-
-    queue.add(new PathInfo(startNode, new ArrayList<Node>(), 0));
     while(!queue.isEmpty()) {
-      PathInfo currentPath = queue.poll();
-      visited.add(currentPath.node);
-      System.out.println("current node: "+currentPath.node.data);
-      if (currentPath.node == targetNode) {
-        System.out.println("Found");
-        printPath(currentPath.node);
-        return;
-      }
-      System.out.println("queue");
+      Node currentNode = queue.poll();
+      // If multiple of the same node has already been added to the queue ensure that
+      // only one is visited.
+      if(currentNode.visited == false) {
+        // Set the visited value of the node to true to avoid it being visited agoin
+        currentNode.visited = true;
+        System.out.println("current node: "+currentNode.data);
+        System.out.println(currentNode);
 
-      ArrayList<Path> paths = currentPath.node.getPaths();
-      for(Path path: paths) {
-        if(!visited.contains(path.destination)) {
-          int temp = currentPath.node.distance + path.cost;
-          if (temp < path.destination.distance) {
-            path.destination.distance = temp;
-            path.destination.parent = currentPath.node;
+        if (currentNode == targetNode) {
+          System.out.println("Found");
+          printShortestPath(currentNode);
+          return graph;
+        }
+
+        ArrayList<Path> paths = currentNode.getPaths();
+        // go through all the paths of the current node
+        for(Path path: paths) {
+          // ensure that the node at the end of the path isn't already visited
+          if(path.destination.visited == false) {
+
+            int temp = currentNode.distance + path.cost;
+            // check to see if the cost to get to the node from the current path is -
+            // shorter than any of the other paths that have this node as its destination
+            if (temp < path.destination.distance) {
+              path.destination.distance = temp; // set the distance to get to that node
+              path.destination.parent = currentNode; // set the parent node
+              System.out.print(path.destination.data+" ");
+              System.out.println(path.destination.distance);
+              queue.add(path.destination); // add the node to the queue
+            }
           }
-          queue.add(new PathInfo(path.destination, new ArrayList<Node>(), path.cost+currentPath.node.distance));
-          System.out.print(path.destination.data+" ");
-          System.out.println(path.destination.distance);
         }
       }
-
-
-
-
-
     } // end of while
-    return;
-
+    return graph;
   } // end of calculateShortest Path
 
-  public void printPath(Node solution) {
+  /**
+   * gets the data from the point of the graph which is deemed the solution and works backwards
+   * to get the actual path to take
+   * @param solution: the desired Node in the graph to work backwards from to reach the start
+   * @return void
+   */
+  public void printShortestPath(Node solution) {
     Stack<String> stack= new Stack<>();
     for(Node thisNode = solution; thisNode!=null; thisNode = thisNode.parent)
       stack.push(thisNode.data);
     while(!stack.isEmpty()) {
       System.out.print(stack.pop()+" ");
     }
-  }
+    return;
+  } // end of printShortestPath
 } // end of Dijkstra class

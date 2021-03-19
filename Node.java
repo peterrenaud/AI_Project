@@ -5,7 +5,7 @@ class Node {
   String data;
   int distance = Integer.MAX_VALUE;
   Node parent;
-  //Map<Node, Integer> adjacentNodes = new HashMap<>();
+  boolean visited = false;
   ArrayList<Path> adjacentNodes = new ArrayList<>();;
 
 

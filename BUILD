@@ -14,5 +14,5 @@ java_library(
 
 java_library(
 	name = "node_and_path",
-	srcs = ["Path.java","Node.java","PathInfo.java", "Graph.java"],
+	srcs = ["Path.java","Node.java", "Graph.java"],
 )
