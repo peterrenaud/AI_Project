@@ -7,7 +7,7 @@ java_library(
 java_library(
     name = "DBAccess",
     srcs = ["test_DB.java"],
-    deps = ["//lib:mongodb","//lib:mongodb-sync", "//lib:bson","//lib:mongodb-streams"],
+    deps = ["//lib:mongodb","//lib:mongodb-sync", "//lib:bson","//lib:mongodb-streams", "//lib:jackson",],
     visibility = ["//src/User_Interface:__pkg__"],
 )
 
