@@ -8,5 +8,5 @@ java_binary(
 java_library(
 	name = "menu",
 	srcs = ["test_Menu.java"],
-	deps = ["//src/Connect:geocode"],
+	deps = ["//src/Connect:geocode", "//src/Connect:Entries", "//src/Connect:StreetFinder"],
 )
