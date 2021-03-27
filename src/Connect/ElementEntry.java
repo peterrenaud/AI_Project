@@ -1,7 +1,8 @@
 package src.Connect;
 
+// Stores queries from Road_Net_Elements collection
 public class ElementEntry {
-    private String objectid;
+    private String streetid;
     private String junction_FROM;
     private String junction_TO;
     private String accuracy;
@@ -10,6 +11,7 @@ public class ElementEntry {
     private String direction;
     private String type;
     private String toll;
+    private String exit;
     private String acqtech;
     private String credate;
     private String revdate;
@@ -32,12 +34,12 @@ public class ElementEntry {
         national_ID = measure;
     }
 
-    public void setobjectid(String id){
-        objectid = id;
+    public void setstreetid(String id){
+        streetid = id;
     }
 
-    public void setlength(String name){
-        length = name;
+    public void setlength(String len){
+        length = len;
     }
 
     public void setdirection(String reg){
@@ -54,6 +56,10 @@ public class ElementEntry {
 
     public void settoll(String t){
         toll = t;
+    }
+
+    public void setexit(String e){
+        exit = e;
     }
 
     public void setacqtech(String acq){
@@ -88,8 +94,8 @@ public class ElementEntry {
         return national_ID;
     }
 
-    public String getobjectid(){
-        return objectid;
+    public String getstreetid(){
+        return streetid;
     }
 
     public String getlength(){
@@ -110,6 +116,10 @@ public class ElementEntry {
 
     public String gettoll(){
         return toll;
+    }
+
+    public String getexit(){
+        return exit;
     }
 
     public String getacqtech(){

@@ -1,50 +1,39 @@
 package src.Connect;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 
+// Used to store Junctions for the Dijkstra algorithm
 public class StreetNode {
     private LinkedList<StreetNode> parents;
-    private String junctionFrom;
-    private String junctionTo;
+    private LinkedList<JunctionEntry> junctions;
     private String streetname;
     private String agency;
-    private String streetId;
-    private String latitude;
-    private String longitude;
+    private ArrayList<Long> streetId;
     private int depth;
 
     public StreetNode(){
         parents = null;
-        junctionFrom = "";
-        junctionTo = "";
         streetname = "";
-        streetId = "";
-        latitude  = "";
-        longitude = "";
+        streetId = new ArrayList<Long>();
         depth = 0;
     }
 
-    public StreetNode(LinkedList<StreetNode> pars, String junFrom, String junTo, String name, String id, String lat, String lon, int dep){
-        parents = pars;
-        junctionFrom = junFrom;
-        junctionTo = junTo;
+    public StreetNode(StreetNode pars, LinkedList<JunctionEntry> junctions, String name, ArrayList<Long> id, int dep){
+        setParents(pars);
         streetname = name;
         streetId = id;
-        latitude = lat;
-        longitude = lon;
         depth = dep;
     }
 
+    @SuppressWarnings("unchecked")
     public LinkedList<StreetNode> getParents(){
-        return parents;
+        return (LinkedList<StreetNode>) parents.clone();
     }
 
-    public String getJunctionFrom(){
-        return junctionFrom;
-    }
-
-    public String getJunctionTo(){
-        return junctionTo;
+    @SuppressWarnings("unchecked")
+    public LinkedList<JunctionEntry> getJunctions(){
+        return (LinkedList<JunctionEntry>)junctions.clone();
     }
 
     public String getStreetname(){
@@ -55,16 +44,8 @@ public class StreetNode {
         return agency;
     }
 
-    public String getStreetId(){
+    public ArrayList<Long> getStreetId(){
         return streetId;
-    }
-
-    public String getLatitude(){
-        return latitude;
-    }
-
-    public String getLongitude(){
-        return longitude;
     }
 
     public int getDepth(){
@@ -76,12 +57,12 @@ public class StreetNode {
         parents.add(parent);
     }
 
-    public void setJunctionFrom(String junction){
-        junctionFrom = junction;
+    public void setJunctions(LinkedList<JunctionEntry> js){
+        junctions = js;
     }
 
-    public void setJuncitonTo(String junction){
-        junctionTo = junction;
+    public void addJunction(JunctionEntry js){
+        junctions.push(js);
     }
 
     public void setStreetname(String name){
@@ -92,16 +73,8 @@ public class StreetNode {
         agency = ag;
     }
 
-    public void setStreetId(String id){
+    public void setStreetId(ArrayList<Long> id){
         streetId = id;
-    }
-
-    public void setLatitude(String lat){
-        latitude = lat;
-    }
-
-    public void setLongitude(String lon){
-        longitude = lon;
     }
 
     public void setDepth(int dep){
@@ -109,13 +82,13 @@ public class StreetNode {
     }
 
     public String toString(){
-        return "junction_FROM " + junctionFrom + "\n" +
-               "junction_TO " + junctionTo + "\n" +
-               "streetname " + streetname + "\n" +
+        String output = "";
+        for(int i = 0; i < junctions.size(); i++){
+            output += "Junction"+i+": "+junctions.get(i).toString() + "\n";
+        }
+        return output += "streetname " + streetname + "\n" +
                "agency " + agency + "\n" +
                "streetId " + streetId + "\n" +
-               "latitude " + latitude + "\n" +
-               "longitude " + longitude + "\n" +
                "depth " + depth;
     }
 

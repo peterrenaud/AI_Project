@@ -1,8 +1,9 @@
 package src.Connect;
 
+// Stores queries from Street_Names collection
 public class StreetEntry{
     private String event_ID;
-    private String ornelement_ID;
+    private String streetid;
     private String measure_FROM;
     private String measure_TO;
     private String streetname;
@@ -15,8 +16,8 @@ public class StreetEntry{
         event_ID = id;
     }
 
-    public void setornelement_ID(String id){
-        ornelement_ID = id;
+    public void setstreetid(String id){
+        streetid = id;
     }
 
     public void setmeasure_FROM(String measure){
@@ -51,8 +52,8 @@ public class StreetEntry{
         return event_ID;
     }
 
-    public String getornelement_ID(){
-        return ornelement_ID;
+    public String getstreetid(){
+        return streetid;
     }
 
     public String getmeasure_FROM(){
