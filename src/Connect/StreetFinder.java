@@ -139,6 +139,7 @@ public class StreetFinder {
 
         JunctionNode output = new JunctionNode();
 
+
         JunctionEntry closestJunction = new JunctionEntry();
         JunctionEntry current = new JunctionEntry();
         double closest = Double.MAX_VALUE;
@@ -159,48 +160,61 @@ public class StreetFinder {
         distance = Math.sqrt(Math.pow(destination[0] - output.getLatitude(), 2) + Math.pow(destination[1] - output.getLongitude(), 2));
         output.setDistance(distance);
 
-        ArrayList<String> junctionIds = new ArrayList<String>();
-        
-        MongoCursor<Document> docs  = database.getCollection("Road_Net_Elements").find(or(eq("junction_FROM", closestJunction.getjunction_ID()),eq("junction_TO", closestJunction.getjunction_ID()))).projection(excludeId()).iterator();
-        Document doc = null;
-        ElementEntry tempElement = null;
-        String tempID = "";
-        boolean skip = false;
-        ObjectMapper mapper = new ObjectMapper();
+        findAdjacentJunctions(output, destination);
 
+        return output;       
+    }
+
+    /**
+     * Finds all the Junctions adjacent to a given JunctionNode
+     * @param node
+     * @param destination
+     */
+    public void findAdjacentJunctions(JunctionNode node, double[] destination){
         try{
+            ArrayList<JunctionNode> junctionAdj = new ArrayList<JunctionNode>();
+            JunctionNode tempNode =null;
+        
+            MongoCursor<Document> docs  = database.getCollection("Road_Net_Elements").find(or(eq("junction_FROM", Long.toString(node.getJunction_ID())),eq("junction_TO", Long.toString(node.getJunction_ID())))).projection(excludeId()).iterator();
+            Document doc = null;
+            ElementEntry tempElement = null;
+            long tempID = 0;
+            boolean skip = false;
+            ObjectMapper mapper = new ObjectMapper();
+
             while(docs.hasNext()){
                 doc = docs.next();
                 tempElement = mapper.readValue(doc.toJson(), ElementEntry.class);
 
                 // One of the junctions is the starting junction, so we want to add the other junction instead
-                if(tempElement.getjunction_FROM().compareTo(closestJunction.getjunction_ID()) == 0){
-                    tempID = tempElement.getjunction_TO();
+                if(tempElement.getjunction_FROM().compareTo(Long.toString(node.getJunction_ID())) == 0){
+                    tempID = Long.parseLong(tempElement.getjunction_TO());
                 }
                 else{
-                    tempID = tempElement.getjunction_FROM();
+                    tempID = Long.parseLong(tempElement.getjunction_FROM());
                 }
                 // Check that we are not adding a duplicate junction
-                for(int i = 0; i < junctionIds.size(); i++){
-                    if(tempID.compareTo(junctionIds.get(i))== 0){
+                for(int i = 0; i < junctionAdj.size(); i++){
+                    if(tempID == junctionAdj.get(i).getJunction_ID()){
                         skip = true;
                         break;
                     }
                 }
-                if(!skip)
-                    junctionIds.add(tempID);
+                // Creates a Junction Node and adds it to the adjacent junctions
+                if(!skip){
+                    doc = database.getCollection("Junctions").find(eq("junction_ID",Long.toString(tempID))).projection(excludeId()).first();
+                    tempNode = new JunctionNode(mapper.readValue(doc.toJson(), JunctionEntry.class));
+                    tempNode.setDistance(Math.sqrt((Math.pow(destination[0] - tempNode.getLatitude(), 2) + Math.pow(destination[1] - tempNode.getLongitude(), 2))));
+                    junctionAdj.add(tempNode);
+                }
             }
-
-            output.setadjacentJunctions(junctionIds);
-            return output;
+            node.setadjacentJunctions(junctionAdj);
         } 
         catch(JsonMappingException jme){
             jme.printStackTrace(); 
-            return null;
         }
         catch(JsonProcessingException jpe){
             jpe.printStackTrace();
-            return null;
         }
     }
 

@@ -224,13 +224,18 @@ public class test_Menu extends JFrame implements ActionListener{
     @Override
     public void actionPerformed(ActionEvent e) {
         if(e.getActionCommand() == "Search"){
-            // To start off to test dijkstra, use Junctions as nodes as they have geocoordinates are easy to
+            // To start off to test dijkstra, use Junctions as nodes as they have geocoordinates and are easy to
             // find connecting junctions through Road_Net_Elements
             double[] location1 = test_Geocode.Geocode("Canada", city1_tf.getText(), address1_tf.getText());
             double[] location2 = test_Geocode.Geocode("Canada", city2_tf.getText(), address2_tf.getText());
             StreetFinder finder = new StreetFinder();
-            StreetNode startNode = finder.findStreet(city1_tf.getText(), address1_tf.getText());
-            StreetNode destinationNode = finder.findStreet(city2_tf.getText(), address2_tf.getText());
+
+            // Basic way to remove the house number from the street address
+            String street1 = address1_tf.getText().split("[0-9]+ ")[1];
+            String street2 = address2_tf.getText().split("[0-9]+ ")[1];
+
+            StreetNode startNode = finder.findStreet(city1_tf.getText(), street1);
+            StreetNode destinationNode = finder.findStreet(city2_tf.getText(), street2);
 
             System.out.println("\n\n" + startNode.toString() + "\n");
             System.out.println("\n\n" + destinationNode.toString() + "\n");
@@ -245,6 +250,7 @@ public class test_Menu extends JFrame implements ActionListener{
             // Dijkstra(startNode, endNode);
             //map_icon.setImage(test_Geocode.staticMap(location1[0], location1[1], location2[0], location2[1]));
             //map.repaint();
+            
         }
         
     }
