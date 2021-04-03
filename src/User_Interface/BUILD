@@ -2,11 +2,11 @@ java_binary(
 	name = "test",
 	srcs = ["test.java"],
 	main_class = "src.User_Interface.test",
-	deps = [":menu"],
+	deps = [":menu", "//src/Connect:DBAccess"],
 )
 
 java_library(
 	name = "menu",
 	srcs = ["test_Menu.java"],
-	deps = ["//src/Connect:geocode"],
+	deps = ["//src/Connect:geocode", "//src/Connect:Entries_and_Nodes", "//src/Connect:StreetFinder"],
 )

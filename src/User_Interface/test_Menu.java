@@ -1,6 +1,9 @@
 package src.User_Interface;
 
 import src.Connect.test_Geocode;
+import src.Connect.StreetNode;
+import src.Connect.JunctionNode;
+import src.Connect.StreetFinder;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -65,6 +68,9 @@ public class test_Menu extends JFrame implements ActionListener{
         gbc_start.gridy = 1;
         window.add(start, gbc_start);
 
+        // In future versions, might expand to other countries,
+        // But currently only have data for streets in Ontario
+        /*
         country1_l = new JLabel("Enter country.");
         GridBagConstraints gbc_country1_l = new GridBagConstraints();
         gbc_country1_l.gridwidth = 1;
@@ -85,6 +91,7 @@ public class test_Menu extends JFrame implements ActionListener{
         gbc_country1_tf.gridy = 2;
         gbc_country1_tf.ipadx = 100;
         window.add(country1_tf, gbc_country1_tf); 
+        */
 
         city1_l = new JLabel("Enter city.");
         GridBagConstraints gbc_city1_l = new GridBagConstraints();
@@ -137,6 +144,7 @@ public class test_Menu extends JFrame implements ActionListener{
         gbc_destination.gridy = 1;
         window.add(destination,gbc_destination);
 
+        /*
         country2_l = new JLabel("Enter country.");
         GridBagConstraints gbc_country2_l = new GridBagConstraints();
         gbc_country2_l.gridwidth = 1;
@@ -156,7 +164,8 @@ public class test_Menu extends JFrame implements ActionListener{
         gbc_country2_tf.gridx = 5;
         gbc_country2_tf.gridy = 2;
         window.add(country2_tf, gbc_country2_tf); 
-
+        */
+        
         city2_l = new JLabel("Enter city.");
         GridBagConstraints gbc_city2_l = new GridBagConstraints();
         gbc_city2_l.gridwidth = 1;
@@ -215,12 +224,33 @@ public class test_Menu extends JFrame implements ActionListener{
     @Override
     public void actionPerformed(ActionEvent e) {
         if(e.getActionCommand() == "Search"){
-            //System.out.println(country1_tf.getText() + " "  + city1_tf.getText() + " " + address1_tf.getText());
-            //System.out.println(country2_tf.getText() + " "  + city2_tf.getText() + " " + address2_tf.getText());
-            double[] location1 = test_Geocode.Geocode(country1_tf.getText(), city1_tf.getText(), address1_tf.getText());
-            double[] location2 = test_Geocode.Geocode(country2_tf.getText(), city2_tf.getText(), address2_tf.getText());
-            map_icon.setImage(test_Geocode.staticMap(location1[0], location1[1], location2[0], location2[1]));
-            map.repaint();
+            // To start off to test dijkstra, use Junctions as nodes as they have geocoordinates and are easy to
+            // find connecting junctions through Road_Net_Elements
+            double[] location1 = test_Geocode.Geocode("Canada", city1_tf.getText(), address1_tf.getText());
+            double[] location2 = test_Geocode.Geocode("Canada", city2_tf.getText(), address2_tf.getText());
+            StreetFinder finder = new StreetFinder();
+
+            // Basic way to remove the house number from the street address
+            String street1 = address1_tf.getText().split("[0-9]+ ")[1];
+            String street2 = address2_tf.getText().split("[0-9]+ ")[1];
+
+            StreetNode startNode = finder.findStreet(city1_tf.getText(), street1);
+            StreetNode destinationNode = finder.findStreet(city2_tf.getText(), street2);
+
+            System.out.println("\n\n" + startNode.toString() + "\n");
+            System.out.println("\n\n" + destinationNode.toString() + "\n");
+
+            JunctionNode startJunction = finder.findClosestJunction(startNode, location1, location2);
+            JunctionNode destinationJunction = finder.findClosestJunction(destinationNode, location2, location2);
+
+            System.out.println("\n\n" + startJunction.toString() + "\n");
+            System.out.println("\n\n" + destinationJunction.toString() + "\n");
+            finder.close();
+            // Run the dijkstra algorithm
+            // Dijkstra(startNode, endNode);
+            //map_icon.setImage(test_Geocode.staticMap(location1[0], location1[1], location2[0], location2[1]));
+            //map.repaint();
+            
         }
         
     }
