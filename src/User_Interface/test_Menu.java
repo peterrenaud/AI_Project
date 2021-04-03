@@ -5,6 +5,8 @@ import src.Connect.StreetNode;
 import src.Connect.JunctionNode;
 import src.Connect.StreetFinder;
 
+import src.Dijkstra.*;
+
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.ImageIcon;
@@ -231,8 +233,19 @@ public class test_Menu extends JFrame implements ActionListener{
             StreetFinder finder = new StreetFinder();
 
             // Basic way to remove the house number from the street address
-            String street1 = address1_tf.getText().split("[0-9]+ ")[1];
-            String street2 = address2_tf.getText().split("[0-9]+ ")[1];
+            String[] streets;
+            String street1, street2;
+            streets = address1_tf.getText().split("[0-9]+ ");
+            if(streets.length == 2)
+                street1 = streets[1];
+            else
+                street1 = streets[0];
+            
+            streets = address2_tf.getText().split("[0-9]+ ");
+            if(streets.length == 2)
+                street2 = streets[1];
+            else
+                street2 = streets[0];
 
             StreetNode startNode = finder.findStreet(city1_tf.getText(), street1);
             StreetNode destinationNode = finder.findStreet(city2_tf.getText(), street2);
@@ -245,11 +258,19 @@ public class test_Menu extends JFrame implements ActionListener{
 
             System.out.println("\n\n" + startJunction.toString() + "\n");
             System.out.println("\n\n" + destinationJunction.toString() + "\n");
+
+            Dijkstra searcher = new Dijkstra();
+            JunctionNode path;
+            if((path = searcher.calculateShortestPath(finder, startJunction, destinationJunction)) != null)
+                System.out.println("Path was found.");
+            else
+                System.out.println("Path not found.");
+
+
             finder.close();
-            // Run the dijkstra algorithm
-            // Dijkstra(startNode, endNode);
-            //map_icon.setImage(test_Geocode.staticMap(location1[0], location1[1], location2[0], location2[1]));
-            //map.repaint();
+
+            map_icon.setImage(test_Geocode.staticMap(location1, location2, path.getPathPoints()));
+            map.repaint();
             
         }
         

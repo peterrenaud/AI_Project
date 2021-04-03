@@ -8,9 +8,9 @@ java_binary(
 java_library(
 	name = "dijkstra",
 	srcs = ["Dijkstra.java"],
-	deps = [":node_and_path"],
+	deps = [":node_and_path", "//src/Connect:Entries_and_Nodes", "//src/Connect:StreetFinder"],
+	visibility = ["//src/User_Interface:__pkg__"],
 )
-
 
 java_library(
 	name = "node_and_path",

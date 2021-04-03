@@ -1,3 +1,5 @@
+package src.Dijkstra;
+
 class Path {
   Node destination;
   int cost;

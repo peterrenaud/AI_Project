@@ -2,6 +2,8 @@ package src.Connect;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoCollection;
@@ -33,6 +35,8 @@ public class StreetFinder {
             "mongodb+srv://Project_Access:Xlzs5fso8ghVivoS@cluster0.xwsnf.mongodb.net/myFirstDatabase?retryWrites=true&w=majority");
         client = new MongoClient(connection);
         database = client.getDatabase("Ontario_Roads");
+        Logger mongoLogger = Logger.getLogger("org.mongodb");
+        mongoLogger.setLevel(Level.SEVERE);
     }
 
     /**
@@ -62,7 +66,6 @@ public class StreetFinder {
             // Finds all street segments with the given name
             MongoCollection<Document> collection = database.getCollection("Street_Names");
             Bson filter = and(regex("streetname",streetname.toUpperCase()), regex("agency", city.toUpperCase()));
-            System.out.println("\n\n" + filter.toString() + "\n");
 
             myDocs = collection.find(filter).projection(fields(excludeId())).iterator();
 
@@ -112,6 +115,8 @@ public class StreetFinder {
                     junctionIds.add(element.getjunction_FROM());
                     junctionIds.add(element.getjunction_TO());
                 }
+                skipFrom = false;
+                skipTo = false;
             }
             
             node.setJunctions(junctions);
@@ -139,7 +144,6 @@ public class StreetFinder {
 
         JunctionNode output = new JunctionNode();
 
-
         JunctionEntry closestJunction = new JunctionEntry();
         JunctionEntry current = new JunctionEntry();
         double closest = Double.MAX_VALUE;
@@ -147,7 +151,7 @@ public class StreetFinder {
         
         while(!possibleJunctions.isEmpty()){
             current = possibleJunctions.pop();
-            distance = Math.sqrt(Math.pow(Double.parseDouble(current.getlatitude()) - location[0],2) - Math.pow(Double.parseDouble(current.getlongitude()) - location[1], 2));
+            distance = Math.sqrt(Math.pow(Double.parseDouble(current.getlatitude()) - location[0],2) + Math.pow(Double.parseDouble(current.getlongitude()) - location[1], 2));
             if(distance < closest){
                 closestJunction = current;
                 closest = distance;
@@ -158,7 +162,7 @@ public class StreetFinder {
         output.setLatitude(Double.parseDouble(closestJunction.getlatitude()));
         output.setLongitude(Double.parseDouble(closestJunction.getlongitude()));
         distance = Math.sqrt(Math.pow(destination[0] - output.getLatitude(), 2) + Math.pow(destination[1] - output.getLongitude(), 2));
-        output.setDistance(distance);
+        output.setDistanceFromDestination(distance);
 
         findAdjacentJunctions(output, destination);
 
@@ -172,8 +176,9 @@ public class StreetFinder {
      */
     public void findAdjacentJunctions(JunctionNode node, double[] destination){
         try{
-            ArrayList<JunctionNode> junctionAdj = new ArrayList<JunctionNode>();
+            ArrayList<JunctionPath> junctionAdj = new ArrayList<JunctionPath>();
             JunctionNode tempNode =null;
+            double cost = 0;
         
             MongoCursor<Document> docs  = database.getCollection("Road_Net_Elements").find(or(eq("junction_FROM", Long.toString(node.getJunction_ID())),eq("junction_TO", Long.toString(node.getJunction_ID())))).projection(excludeId()).iterator();
             Document doc = null;
@@ -195,7 +200,7 @@ public class StreetFinder {
                 }
                 // Check that we are not adding a duplicate junction
                 for(int i = 0; i < junctionAdj.size(); i++){
-                    if(tempID == junctionAdj.get(i).getJunction_ID()){
+                    if(tempID == junctionAdj.get(i).getDestination().getJunction_ID()){
                         skip = true;
                         break;
                     }
@@ -204,11 +209,12 @@ public class StreetFinder {
                 if(!skip){
                     doc = database.getCollection("Junctions").find(eq("junction_ID",Long.toString(tempID))).projection(excludeId()).first();
                     tempNode = new JunctionNode(mapper.readValue(doc.toJson(), JunctionEntry.class));
-                    tempNode.setDistance(Math.sqrt((Math.pow(destination[0] - tempNode.getLatitude(), 2) + Math.pow(destination[1] - tempNode.getLongitude(), 2))));
-                    junctionAdj.add(tempNode);
+                    tempNode.setDistanceFromDestination(Math.sqrt((Math.pow(destination[0] - tempNode.getLatitude(), 2) + Math.pow(destination[1] - tempNode.getLongitude(), 2))));
+                    cost = Math.sqrt((Math.pow(tempNode.getLatitude() - node.getLatitude(), 2) + Math.pow(tempNode.getLongitude() - node.getLongitude(), 2)));
+                    junctionAdj.add(new JunctionPath(tempNode, cost));
                 }
             }
-            node.setadjacentJunctions(junctionAdj);
+            node.setPath(junctionAdj);
         } 
         catch(JsonMappingException jme){
             jme.printStackTrace(); 
@@ -217,6 +223,60 @@ public class StreetFinder {
             jpe.printStackTrace();
         }
     }
+
+        /**
+     * Finds all the Junctions adjacent to a given JunctionNode
+     * @param node
+     * @param destination
+     */
+    // public void findAdjacentJunctions(JunctionNode node){
+    //     try{
+    //         ArrayList<JunctionPath> junctionAdj = new ArrayList<JunctionPath>();
+    //         JunctionNode tempNode =null;
+    //         double cost = 0;
+        
+    //         MongoCursor<Document> docs  = database.getCollection("Road_Net_Elements").find(or(eq("junction_FROM", Long.toString(node.getJunction_ID())),eq("junction_TO", Long.toString(node.getJunction_ID())))).projection(excludeId()).iterator();
+    //         Document doc = null;
+    //         ElementEntry tempElement = null;
+    //         long tempID = 0;
+    //         boolean skip = false;
+    //         ObjectMapper mapper = new ObjectMapper();
+
+    //         while(docs.hasNext()){
+    //             doc = docs.next();
+    //             tempElement = mapper.readValue(doc.toJson(), ElementEntry.class);
+
+    //             // One of the junctions is the starting junction, so we want to add the other junction instead
+    //             if(tempElement.getjunction_FROM().compareTo(Long.toString(node.getJunction_ID())) == 0){
+    //                 tempID = Long.parseLong(tempElement.getjunction_TO());
+    //             }
+    //             else{
+    //                 tempID = Long.parseLong(tempElement.getjunction_FROM());
+    //             }
+    //             // Check that we are not adding a duplicate junction
+    //             for(int i = 0; i < junctionAdj.size(); i++){
+    //                 if(tempID == junctionAdj.get(i).getDestination().getJunction_ID()){
+    //                     skip = true;
+    //                     break;
+    //                 }
+    //             }
+    //             // Creates a Junction Node and adds it to the adjacent junctions
+    //             if(!skip){
+    //                 doc = database.getCollection("Junctions").find(eq("junction_ID",Long.toString(tempID))).projection(excludeId()).first();
+    //                 tempNode = new JunctionNode(mapper.readValue(doc.toJson(), JunctionEntry.class));
+    //                 cost = Math.sqrt((Math.pow(tempNode.getLatitude() - node.getLatitude(), 2) + Math.pow(tempNode.getLongitude() - node.getLongitude(), 2)));
+    //                 junctionAdj.add(new JunctionPath(tempNode, cost));
+    //             }
+    //         }
+    //         node.setPath(junctionAdj);
+    //     } 
+    //     catch(JsonMappingException jme){
+    //         jme.printStackTrace(); 
+    //     }
+    //     catch(JsonProcessingException jpe){
+    //         jpe.printStackTrace();
+    //     }
+    // }
 
     // Unsure if this is needed, but may be worked on in the future
     /*
