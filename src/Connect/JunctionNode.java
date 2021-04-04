@@ -9,6 +9,7 @@ public class JunctionNode {
     private long junction_ID;
     private double distance;
     private double distance_from_destination;
+    private boolean visited;
     private double cost;
     private double latitude;
     private double longitude;
@@ -21,6 +22,7 @@ public class JunctionNode {
         distance_from_destination = -1;
         latitude = -1;
         longitude = -1;
+        visited = false;
     }
 
     public JunctionNode(JunctionEntry junction){
@@ -69,6 +71,10 @@ public class JunctionNode {
         cost = c;
     }
 
+    public void setVisited(boolean b) {
+        visited = b;    
+    }
+
     public JunctionNode getParent(){
         return parent;
     }
@@ -100,6 +106,10 @@ public class JunctionNode {
 
     public double getCost(){
         return cost;
+    }
+
+    public boolean getVisited() {
+        return visited;
     }
 
     public String getData(){
