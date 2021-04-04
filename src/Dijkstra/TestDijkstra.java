@@ -1,3 +1,5 @@
+package src.Dijkstra;
+
 import java.util.ArrayList;
 class TestDijkstra {
   public static void main(String args[]) {
@@ -40,6 +42,7 @@ class TestDijkstra {
     graph.nodes.add(nodeG);
 
     Dijkstra dijkstra = new Dijkstra();
-    dijkstra.calculateShortestPath(graph, nodeS, nodeG);
+
+    //dijkstra.calculateShortestPath(graph, nodeS, nodeG);
   }
 }

@@ -1,3 +1,5 @@
+package src.Dijkstra;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 class Node {

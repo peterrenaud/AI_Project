@@ -1,3 +1,6 @@
+/*
+package src.Dijkstra;
+
 import java.util.ArrayList;
 class Dijkstra {
   public static void main(String args[]) {
@@ -38,3 +41,4 @@ class Dijkstra {
     dijkstra.search(nodeS, "G");
   }
 }
+*/

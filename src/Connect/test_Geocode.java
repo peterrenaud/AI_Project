@@ -10,7 +10,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
-
+import java.util.ArrayList;
 import java.awt.image.BufferedImage;
 
 
@@ -31,7 +31,7 @@ public class test_Geocode {
 
         String latitude = "", longitude = "";
         double lat_fl = 0, long_fl = 0;
-        System.out.println(full_address);
+        //System.out.println(full_address);
         URL url_google;
         HttpsURLConnection conn;
 
@@ -42,7 +42,7 @@ public class test_Geocode {
             return null;
         }
 
-        System.out.println("Response");
+        //System.out.println("Response");
         try{
             conn = (HttpsURLConnection)url_google.openConnection();
             InputStream is = conn.getInputStream();
@@ -67,7 +67,7 @@ public class test_Geocode {
 
             longitude = longitude.split(":")[1];
             long_fl = Double.parseDouble(longitude);
-            System.out.println(lat_fl+"\n"+long_fl);
+            //System.out.println(lat_fl+"\n"+long_fl);
             return new double[] {lat_fl, long_fl};
             
         } catch(IOException e){
@@ -101,7 +101,7 @@ public class test_Geocode {
             InputStream is = conn.getInputStream();
             ByteArrayInputStream baos = new ByteArrayInputStream(is.readAllBytes());
             BufferedImage bi = ImageIO.read(baos);
-            System.out.println("Returning Image");
+            // System.out.println("Returning Image");
             return bi;
         } catch(IOException e){
             e.printStackTrace();
@@ -143,4 +143,52 @@ public class test_Geocode {
         }
     }
 
+    public static BufferedImage staticMap(double[] destination1, double[] destination2, ArrayList<Double> pathPoints){
+        if(destination1.length != 2){
+            System.out.println("Destination 1 is not valid.");
+            return null;
+        }
+        if(destination2.length != 2){
+            System.out.println("Destination 2 is not valid.");
+            return null;
+        }
+        if(pathPoints.size() % 2 != 0){
+            System.out.println("Path points are not valid.");
+            return null;
+        }
+
+        
+        String address1 = destination1[0] + "," + destination1[1];
+        String address2 = destination2[0] + "," + destination2[1]; 
+
+        String path = "";
+
+        for(int i = 0; i < pathPoints.size(); i += 2){
+            path += "|"+pathPoints.get(i)+","+pathPoints.get(i+1);
+        }
+
+        String full_URL = googleAPIURL + "staticmap?markers=" + address1 + "|" + address2 + "&maptype=roadmap&size=500x400&path=color:0x0000ff|weight:5"+path+"&key="+ APIKey;
+
+        URL url_google;
+        HttpsURLConnection conn;
+
+        try{
+            url_google = new URL(full_URL);
+        } catch(MalformedURLException e){
+            e.printStackTrace();
+            return null;
+        }
+
+        try{
+            conn = (HttpsURLConnection)url_google.openConnection();
+            InputStream is = conn.getInputStream();
+            ByteArrayInputStream baos = new ByteArrayInputStream(is.readAllBytes());
+            BufferedImage bi = ImageIO.read(baos);
+            System.out.println("Returning Image");
+            return bi;
+        } catch(IOException e){
+            e.printStackTrace();
+            return null;
+        }
+    }
 }
