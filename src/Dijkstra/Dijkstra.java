@@ -1,10 +1,8 @@
 package src.Dijkstra;
 
 import java.util.PriorityQueue;
-import java.util.Set;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.Stack;
 
 import src.Connect.*;
@@ -19,15 +17,12 @@ public class Dijkstra {
    * @return The graph with the updated data from the dijkstra algorithm
    */
   public JunctionNode calculateShortestPath(StreetFinder streetfinder, JunctionNode startNode, JunctionNode targetNode) {
-    Set<Long> visited = new HashSet<Long>();
-    boolean skip = false;
-    Long currentId = (long) 0;
     double destination[] = {targetNode.getLatitude(), targetNode.getLongitude()};
     startNode.setDistance(0);
 
     Comparator<JunctionNode> distanceComparator = new Comparator<JunctionNode>() {
         public int compare(JunctionNode a, JunctionNode b) {
-          return Double.compare(a.getDistanceFromDestination(), b.getDistanceFromDestination());
+          return Double.compare(a.getDistanceFromDestination()+a.getDistance(), b.getDistanceFromDestination()+b.getDistance());
         }
       };
 
@@ -37,7 +32,8 @@ public class Dijkstra {
       JunctionNode currentNode = queue.poll();
       // If multiple of the same node has already been added to the queue ensure that
       // only one is visited.
-      if(visited.add(currentNode.getJunction_ID())) {
+      if(currentNode.getVisited() == false) {
+        currentNode.setVisited(true); 
         // Set the visited value of the node to true to avoid it being visited again
         //System.out.println("current node:");
         //System.out.println(currentNode);
@@ -52,15 +48,7 @@ public class Dijkstra {
         // go through all the paths of the current node
         for(JunctionPath path: paths) {
           // ensure that the node at the end of the path isn't already visited
-          currentId = path.getDestination().getJunction_ID();
-          for(Long id : visited){
-            if(id == currentId){
-              skip = true;
-              break;
-            }
-          }
-          if(!skip) {
-
+          if(path.getDestination().getVisited() == false) {
             double temp = currentNode.getDistance() + path.getCost();
             // check to see if the cost to get to the node from the current path is -
             // shorter than any of the other paths that have this node as its destination
