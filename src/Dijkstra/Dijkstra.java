@@ -30,7 +30,7 @@ public class Dijkstra {
           return Double.compare(a.getDistanceFromDestination(), b.getDistanceFromDestination());
         }
       };
-      
+
     PriorityQueue<JunctionNode> queue = new PriorityQueue<JunctionNode>(distanceComparator);
     queue.add(startNode);
     while(!queue.isEmpty()) {
@@ -69,7 +69,7 @@ public class Dijkstra {
               path.getDestination().setParent(currentNode); // set the parent node
               streetfinder.findAdjacentJunctions(path.getDestination(), destination);
               //System.out.print(path.getDestination().getData() + "\n");
-              
+
               queue.add(path.getDestination()); // add the node to the queue
             }
           }
